@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全国FMオンエア・トレンド</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <style>
+        body { font-family: sans-serif; background-color: #f8f9fa; margin: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #0056b3; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #f1f3f5; }
+        tr:hover { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📻 全国FMオンエア・トレンド</h1>
+        <div id="status" style="text-align: center; color: #666;">データを読み込み中...</div>
+        <table id="rankingTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>順位</th>
+                    <th>アーティスト</th>
+                    <th>曲名</th>
+                    <th>回数</th>
+                </tr>
+            </thead>
+            <tbody id="rankingBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const csvUrl = 'onair_data.csv';
+        
+        Papa.parse(csvUrl, {
+            download: true,
+            header: true,
+            complete: function(results) {
+                const data = results.data;
+                const body = document.getElementById('rankingBody');
+                const status = document.getElementById('status');
+                const table = document.getElementById('rankingTable');
+
+                if (data.length > 0 && data[0].artist) {
+                    data.forEach(row => {
+                        if (!row.rank) return;
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${row.rank}</td>
+                            <td>${row.artist}</td>
+                            <td>${row.title}</td>
+                            <td>${row.count}</td>
+                        `;
+                        body.appendChild(tr);
+                    });
+                    status.style.display = 'none';
+                    table.style.display = 'table';
+                } else {
+                    status.innerText = 'データがまだ準備できていません。Actionsを実行してください。';
+                }
+            },
+            error: function() {
+                document.getElementById('status').innerText = 'データの読み込みに失敗しました。';
+            }
+        });
+    </script>
+</body>
+</html>
